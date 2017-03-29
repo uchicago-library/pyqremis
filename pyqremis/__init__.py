@@ -95,6 +95,10 @@ class QremisElement:
         return r
 
 
+class PreservationLevel(QremisElement):
+    _spec = {}
+
+
 class ObjectIdentifier(QremisElement):
     _spec = {
         'objectIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
@@ -104,24 +108,37 @@ class ObjectIdentifier(QremisElement):
 
 class Object(QremisElement):
     _spec = {
-        'objectIdentifier': {'repeatable': True, 'mandatory': True, 'type': ObjectIdentifier}
+        'objectIdentifier': {'repeatable': True, 'mandatory': True, 'type': ObjectIdentifier},
+        'objectCategory': {'repeatable': False, 'mandatory': True, 'type': str},
+        'preservationLevel': {'repeatable': True, 'mandatory': False, 'type': PreservationLevel},
+        'significantProperties': {'repeatable': True, 'mandatory': False, 'type': SignificantProperties},
+        'objectCharacteristics': {'repeatable': True, 'mandatory': True, 'type': ObjectCharacteristics},
+        'originalName': {'repeatable': False, 'mandatory': False, 'type': str},
+        'storage': {'repeatable': True, 'mandatory':
+        'signatureInformation':
+        'environmentFunction':
+        'environmentDesignation':
+        'environmentRegistry':
+        'environmentExtension':
+        'linkingRelationships':
+        'objectExtension':
     }
 
 
 class Event(QremisElement):
-    pass
+    _spec = {}
 
 
 class Agent(QremisElement):
-    pass
+    _spec = {}
 
 
 class Rights(QremisElement):
-    pass
+    _spec = {}
 
 
 class Relationship(QremisElement):
-    pass
+    _spec = {}
 
 
 class Qremis(QremisElement):
