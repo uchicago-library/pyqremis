@@ -661,7 +661,7 @@ def enumerate_specification(kls=_RootElement):
         r[x] = {}
         r[x]['repeatable'] = kls._spec[x]['repeatable']
         r[x]['mandatory'] = kls._spec[x]['mandatory']
-        r[x]['type'] = kls._spec[x]['type'].__name__
+        r[x]['type'] = "ExtendedElement" if ExtendedElement in getmro(kls._spec[x]['type']) else "QremisElement"
         if kls._spec[x]['type'] not in [str] and \
                 ExtendedElement not in getmro(kls._spec[x]['type']):
             r[x]['spec'] = enumerate_specification(kls=kls._spec[x]['type'])
