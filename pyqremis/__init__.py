@@ -100,8 +100,45 @@ class QremisElement:
         return r
 
 
-class ObjectExtension(QremisElement):
-    _spec = {}
+class ExtensionElement(QremisElement):
+    def __init__(self, **kwargs):
+        if len(kwargs) == 0:
+            raise ValueError("No empty elements!")
+        self._fields = {}
+        for x in kwargs:
+            self.add_to_field(x, kwargs[x])
+
+    def set_field(self, fieldname, fieldvalue, _type=None, repeatable=True):
+        # Flip the default repeatability out here in the wild west of metadata
+        super().set_field(fieldname, fieldvalue, _type=_type, repeatable=repeatable)
+
+
+class ExtendedElement(QremisElement):
+    def __init__(self, **kwargs):
+        # Extended Elements only accept Extension Elements as values eg, in XML parlance
+        # Extended Elements *must* be complex. Nodes can also only be set in the init via
+        # kwargs, because every arg (probably) has the same class name, so we can't mine
+        # the field name out of it.
+        # We don't dynamically whip up any any getters or setters, and there's no validation
+        # on what gets added here.
+        # AKA - manage these yourself if you want them to abide by some other specification.
+        # Because we're outside of the specification now we take the most permissive stance
+        # when creating things - everything is potentially repeatable and nothing is mandatory.
+        # Working with these means you should start using the methods that you _shouldn't_ be
+        # using for defined QremisElement instances:
+        # set_field(), add_to_field(), get_field(), and del_field()
+        if len(kwargs) == 0:
+            raise ValueError("No empty elements!")
+        self._fields = {}
+        for x in kwargs:
+            self.add_to_field(x, kwargs[x])
+
+    def set_field(self, fieldname, fieldvalue):
+        super().set_field(fieldname, fieldvalue, _type=ExtensionElement, repeatable=True)
+
+
+class ObjectExtension(ExtendedElement):
+    pass
 
 
 class LinkingRelationshipIdentifier(QremisElement):
@@ -117,8 +154,8 @@ class LinkingRelationships(QremisElement):
     }
 
 
-class EnvironmentExtension(QremisElement):
-    _spec = {}
+class EnvironmentExtension(ExtendedElement):
+    pass
 
 
 class EnvironmentRegistry(QremisElement):
@@ -129,8 +166,8 @@ class EnvironmentRegistry(QremisElement):
     }
 
 
-class EnvironmentDesignationExtension(QremisElement):
-    _spec = {}
+class EnvironmentDesignationExtension(ExtendedElement):
+    pass
 
 
 class EnvironmentDesignation(QremisElement):
@@ -151,12 +188,12 @@ class EnvironmentFunction(QremisElement):
     }
 
 
-class KeyInformation(QremisElement):
-    _spec = {}
+class KeyInformation(ExtendedElement):
+    pass
 
 
-class SignatureInformationExtension(QremisElement):
-    _spec = {}
+class SignatureInformationExtension(ExtendedElement):
+    pass
 
 
 class Signature(QremisElement):
@@ -223,8 +260,8 @@ class Format(QremisElement):
     }
 
 
-class CreatingApplicationExtension(QremisElement):
-    _spec = {}
+class CreatingApplicationExtension(ExtendedElement):
+    pass
 
 
 class CreatingApplication(QremisElement):
@@ -244,8 +281,8 @@ class Inhibitors(QremisElement):
     }
 
 
-class ObjectCharacteristicsExtension(QremisElement):
-    _spec = {}
+class ObjectCharacteristicsExtension(ExtendedElement):
+    pass
 
 
 class ObjectCharacteristics(QremisElement):
@@ -261,8 +298,8 @@ class ObjectCharacteristics(QremisElement):
     }
 
 
-class SignificantPropertiesExtension(QremisElement):
-    _spec = {}
+class SignificantPropertiesExtension(ExtendedElement):
+    pass
 
 
 class SignificantProperties(QremisElement):
@@ -310,8 +347,8 @@ class Object(QremisElement):
     }
 
 
-class EventExtension(QremisElement):
-    _spec = {}
+class EventExtension(ExtendedElement):
+    pass
 
 
 class EventDetailInformation(QremisElement):
@@ -321,8 +358,8 @@ class EventDetailInformation(QremisElement):
     }
 
 
-class EventOutcomeDetailExtension(QremisElement):
-    _spec = {}
+class EventOutcomeDetailExtension(ExtendedElement):
+    pass
 
 
 class EventOutcomeDetail(QremisElement):
@@ -390,8 +427,8 @@ class TermOfRestriction(QremisElement):
     }
 
 
-class RightsExtension(QremisElement):
-    _spec = {}
+class RightsExtension(ExtendedElement):
+    pass
 
 
 class RightsGranted(QremisElement):
@@ -543,8 +580,8 @@ class Rights(QremisElement):
     }
 
 
-class RelationshipExtension(QremisElement):
-    _spec = {}
+class RelationshipExtension(ExtendedElement):
+    pass
 
 
 class LinkingRightsIdentifier(QremisElement):
@@ -618,12 +655,14 @@ class _RootElement(QremisElement):
 
 
 def enumerate_specification(kls=_RootElement):
+    from inspect import getmro
     r = {}
     for x in kls._spec:
         r[x] = {}
         r[x]['repeatable'] = kls._spec[x]['repeatable']
         r[x]['mandatory'] = kls._spec[x]['mandatory']
         r[x]['type'] = kls._spec[x]['type'].__name__
-        if kls._spec[x]['type'] not in [str]:  # I'll leave this easily extensible for the moment
+        if kls._spec[x]['type'] not in [str] and \
+                ExtendedElement not in getmro(kls._spec[x]['type']):
             r[x]['spec'] = enumerate_specification(kls=kls._spec[x]['type'])
     return r
