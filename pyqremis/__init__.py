@@ -152,13 +152,9 @@ class ExtensionElement(QremisElement):
 
 class ExtendedElement(QremisElement):
     def __init__(self, **kwargs):
-        # Extended Elements only accept Extension Elements as values eg, in XML parlance
-        # Extended Elements *must* be complex. Nodes can also only be set in the init via
-        # kwargs, because every arg (probably) has the same class name, so we can't mine
-        # the field name out of it.
+        # Values can only be set in the init via kwargs
         # We don't dynamically whip up any any getters or setters, and there's no validation
         # on what gets added here.
-        # AKA - manage these yourself if you want them to abide by some other specification.
         # Because we're outside of the specification now we take the most permissive stance
         # when creating things - everything is potentially repeatable and nothing is mandatory.
         # Working with these means you should start using the methods that you _shouldn't_ be
@@ -170,8 +166,8 @@ class ExtendedElement(QremisElement):
         for x in kwargs:
             self.add_to_field(x, kwargs[x])
 
-    def set_field(self, fieldname, fieldvalue):
-        super().set_field(fieldname, fieldvalue, _type=ExtensionElement, repeatable=True)
+    def set_field(self, fieldname, fieldvalue, _type=None):
+        super().set_field(fieldname, fieldvalue, _type=_type, repeatable=True)
 
 
 class ObjectExtension(ExtendedElement):
