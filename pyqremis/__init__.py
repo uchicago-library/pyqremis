@@ -63,6 +63,8 @@ class QremisElement:
                 getattr(self, "set_{}".format(x))(kwargs[x])
 
     def set_field(self, fieldname, fieldvalue, _type=None, repeatable=False):
+        # TODO: Handle iters better? Probably need to dig around
+        # in collections.abc
         if repeatable:
             try:
                 self.add_to_field(fieldname, fieldvalue, _type=_type)
@@ -682,6 +684,9 @@ class Qremis(QremisElement):
 
 class QremisRoot(QremisElement):
     # Root node for making recursion sane
+    # Remedies a few cases where serializations that begin with an iterable
+    # vs serializations that begin with a root type element
+    # (aka, JSON and XML)
     _spec = {
         'qremis': {'repeatable': False, 'mandatory': True, 'type': Qremis}
     }
