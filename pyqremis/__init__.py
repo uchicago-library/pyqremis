@@ -95,8 +95,99 @@ class QremisElement:
         return r
 
 
-class PreservationLevel(QremisElement):
+class ObjectExtension(QremisElement):
     _spec = {}
+
+
+class LinkingRelationships(QremisElement):
+    _spec = {}
+
+
+class EnvironmentExtension(QremisElement):
+    _spec = {}
+
+
+class EnvironmentRegistry(QremisElement):
+    _spec = {}
+
+
+class EnvironmentDesignation(QremisElement):
+    _spec = {}
+
+
+class EnvironmentFunction(QremisElement):
+    _spec = {}
+
+
+class SignatureInformation(QremisElement):
+    _spec = {}
+
+
+class Storage(QremisElement):
+    _spec = {}
+
+
+class Fixity(QremisElement):
+    _spec = {}
+
+
+class Format(QremisElement):
+    _spec = {}
+
+
+class CreatingApplication(QremisElement):
+    _spec = {
+        'creatingApplicationName': {'repeatable': False, 'mandatory': False, 'type': str},
+
+    }
+
+
+class Inhibitors(QremisElement):
+    _spec = {
+        'inhibitorType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'inhinitorTarget': {'repeatable': True, 'mandatory': False, 'type': str},
+        'inhibitorKey': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class ObjectCharacteristicsExtension(QremisElement):
+    _spec = {}
+
+
+class ObjectCharacteristics(QremisElement):
+    _spec = {
+        'compositionLevel': {'repeatable': False, 'mandatory': False, 'type': str},
+        'fixity': {'repeatable': True, 'mandatory': False, 'type': Fixity},
+        'size': {'repeatable': False, 'mandatory': False, 'type': str},
+        'format': {'repeatable': True, 'mandatory': True, 'type': Format},
+        'creatingApplication': {'repeatable': True, 'mandatory': False, 'type': CreatingApplication},
+        'inhibitors': {'repeatable': True, 'mandatory': False, 'type': Inhibitors},
+        'objectCharacteristicsExtension': {'repeatable': True, 'mandatory': False,
+                                           'type': ObjectCharacteristicsExtension}
+    }
+
+
+class SignificantPropertiesExtension(QremisElement):
+    _spec = {}
+
+
+class SignificantProperties(QremisElement):
+    _spec = {
+        'significantPropertiesType': {'repeatable': False, 'mandatory': False, 'type': str},
+        'significantPropertiesValue': {'repeatable': False, 'mandatory': False, 'type': str},
+        'significantPropertiesExtension': {'repeatable': True, 'mandatory': False,
+                                           'type': SignificantPropertiesExtension}
+    }
+
+
+class PreservationLevel(QremisElement):
+    _spec = {
+        'preservationLevelType': {'repeatable': False, 'mandatory': False, 'type': str},
+        'preservationLevelValue': {'repeatable': False, 'mandatory': True, 'type': str},
+        'preservationLevelRole': {'repeatable': False, 'mandatory': False, 'type': str},
+        'preservationLevelRationale': {'repeatable': True, 'mandatory': False, 'type': str},
+        'preservationLevelDateAssigned': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
 
 
 class ObjectIdentifier(QremisElement):
@@ -114,14 +205,14 @@ class Object(QremisElement):
         'significantProperties': {'repeatable': True, 'mandatory': False, 'type': SignificantProperties},
         'objectCharacteristics': {'repeatable': True, 'mandatory': True, 'type': ObjectCharacteristics},
         'originalName': {'repeatable': False, 'mandatory': False, 'type': str},
-        'storage': {'repeatable': True, 'mandatory':
-        'signatureInformation':
-        'environmentFunction':
-        'environmentDesignation':
-        'environmentRegistry':
-        'environmentExtension':
-        'linkingRelationships':
-        'objectExtension':
+        'storage': {'repeatable': True, 'mandatory': False, 'type': Storage},
+        'signatureInformation': {'mandatory': False, 'repeatable': True, 'type': SignatureInformation},
+        'environmentFunction': {'mandatory': False, 'repeatable': True, 'type': EnvironmentFunction},
+        'environmentDesignation': {'mandatory': False, 'repeatable': True, 'type': EnvironmentDesignation},
+        'environmentRegistry':  {'mandatory': False, 'repeatable': True, 'type': EnvironmentRegistry},
+        'environmentExtension': {'mandatory': False, 'repeatable': True, 'type': EnvironmentExtension},
+        'linkingRelationships': {'mandatory': False, 'repeatable': False, 'type': LinkingRelationships},
+        'objectExtension': {'mandatory': False, 'repeatable': True, 'type': ObjectExtension}
     }
 
 
