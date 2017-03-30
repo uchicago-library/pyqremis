@@ -97,10 +97,47 @@ class QremisElement:
 
     def to_dict(self):
         r = {}
+        for x in self._fields:
+            if isinstance(self._fields[x], list):
+                r[x] = []
+                for y in self._fields[x]:
+                    if isinstance(y, QremisElement):
+                        r[x].append(y.to_dict())
+                    else:
+                        r[x].append(y)
+            else:
+                if isinstance(self._fields[x], QremisElement):
+                    r[x] = self._fields[x].to_dict()
+                else:
+                    r[x] = self._fields[x]
         return r
+
+    def to_xml_element(self):
+        import xml.etree.ElementTree as ET
+        e = ET.Element(lowerFirst(self.__class__.__name__))
+        for x in self._fields:
+            if isinstance(self._fields[x], list):
+                for y in self._fields[x]:
+                    if isinstance(y, QremisElement):
+                        e.append(y.to_xml_element())
+                    else:
+                        i = ET.Element(x)
+                        i.text = y
+                        e.append(i)
+            else:
+                if isinstance(self._fields[x], QremisElement):
+                    e.append(self._fields[x].to_xml_element())
+                else:
+                    i = ET.Element(x)
+                    i.text = self._fields[x]
+                    e.append(i)
+        return e
 
 
 class ExtensionElement(QremisElement):
+    # Extension Elements are (almost) wholely uncontrolled. At the moment I'm preventing them
+    # from being init'd empty. They (by default) assume fields are repeatable unless the kwarg
+    # in set_field is set to False
     def __init__(self, **kwargs):
         if len(kwargs) == 0:
             raise ValueError("No empty elements!")
@@ -647,14 +684,14 @@ class Qremis(QremisElement):
     }
 
 
-class _RootElement(QremisElement):
-    # Makes the recursion for the enumerate_specification function clean
+class QremisRoot(QremisElement):
+    # Root node for making recursion sane
     _spec = {
         'qremis': {'repeatable': False, 'mandatory': True, 'type': Qremis}
     }
 
 
-def enumerate_specification(kls=_RootElement):
+def enumerate_specification(kls=QremisRoot):
     from inspect import getmro
     r = {}
     for x in kls._spec:
