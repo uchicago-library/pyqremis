@@ -9,6 +9,11 @@ def lowerFirst(s):
 
 class QremisElement:
     def __init__(self, *args, **kwargs):
+        # Structural requirement for child classes
+        # (abc doesn't have an appropriate dectorator for this,
+        # from what I can find)
+        if not hasattr(self, "_spec"):
+            raise AssertionError("Incorrectly defined child class")
         # Be sure we can build a valid element
         if len(args) == 0 and len(kwargs) == 0:
             raise ValueError("No empty elements!")
@@ -99,8 +104,17 @@ class ObjectExtension(QremisElement):
     _spec = {}
 
 
+class LinkingRelationshipIdentifier(QremisElement):
+    _spec = {
+        'linkingRelationshipIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingRelationshipIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
 class LinkingRelationships(QremisElement):
-    _spec = {}
+    _spec = {
+        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': True, 'type': LinkingRelationshipIdentifier}
+    }
 
 
 class EnvironmentExtension(QremisElement):
@@ -108,37 +122,117 @@ class EnvironmentExtension(QremisElement):
 
 
 class EnvironmentRegistry(QremisElement):
+    _spec = {
+        'environmentRegistryName': {'repeatable': False, 'mandatory': True, 'type': str},
+        'environmentRegistryKey': {'repeatable': False, 'mandatory': True, 'type': str},
+        'environmentRegistryRole': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class EnvironmentDesignationExtension(QremisElement):
     _spec = {}
 
 
 class EnvironmentDesignation(QremisElement):
-    _spec = {}
+    _spec = {
+        'environmentName': {'repeatable': False, 'mandatory': True, 'type': str},
+        'environmentVersion': {'repeatable': False, 'mandatory': False, 'type': str},
+        'environmentOrigin': {'repeatable': False, 'mandatory': False, 'type': str},
+        'environmentDesignationNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'environmentDesignationExtension': {'repeatable': True, 'mandatory': False,
+                                            'type': EnvironmentDesignationExtension}
+    }
 
 
 class EnvironmentFunction(QremisElement):
+    _spec = {
+        'environmentFunctionType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'environmentFunctionValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class KeyInformation(QremisElement):
     _spec = {}
+
+
+class SignatureInformationExtension(QremisElement):
+    _spec = {}
+
+
+class Signature(QremisElement):
+    _spec = {
+        'signatureEncoding': {'repeatable': False, 'mandatory': True, 'type': str},
+        'signer': {'repeatable': False, 'mandatory': False, 'type': str},
+        'signatureMethod': {'repeatable': False, 'mandatory': False, 'type': str},
+        'signatureValue': {'repeatable': False, 'mandatory': False, 'type': str},
+        'signatureValidationRules': {'repeatable': False, 'mandatory': True, 'type': str},
+        'signatureProperties': {'repeatable': True, 'mandatory': False, 'type': str},
+        'keyInformation': {'repeatable': False, 'mandatory': False, 'type': KeyInformation}
+    }
 
 
 class SignatureInformation(QremisElement):
-    _spec = {}
+    _spec = {
+        'signature': {'repeatable': True, 'mandatory': False, 'type': Signature},
+        'signatureInformationExtension': {'repeatable': True, 'mandatory': False, 'type': SignatureInformationExtension}
+    }
+
+
+class ContentLocation(QremisElement):
+    _spec = {
+        'contentLocationType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'contentLocationValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
 
 
 class Storage(QremisElement):
-    _spec = {}
+    _spec = {
+        'contentLocation': {'repeatable': False, 'mandatory': False, 'type': ContentLocation},
+        'storageMedium': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
 
 
 class Fixity(QremisElement):
-    _spec = {}
+    _spec = {
+        'messageDigestAlgorithm': {'repeatable': False, 'mandatory': True, 'type': str},
+        'messageDigest': {'repeatable': False, 'mandatory': True, 'type': str},
+        'messageDigestOriginator': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class FormatRegistry(QremisElement):
+    _spec = {
+        'formatRegistryName': {'repeatable': False, 'mandatory': True, 'type': str},
+        'formatRegistryKey': {'repeatable': False, 'mandatory': True, 'type': str},
+        'formatRegistryRole': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class FormatDesignation(QremisElement):
+    _spec = {
+        'formatName': {'repeatable': False, 'mandatory': True, 'type': str},
+        'formatVersion': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
 
 
 class Format(QremisElement):
+    _spec = {
+        'formatDesignation': {'repeatable': False, 'mandatory': False, 'type': FormatDesignation},
+        'formatRegistry': {'repeatable': False, 'mandatory': False, 'type': FormatRegistry},
+        'formatNote': {'repeatable': True, 'mandatory': False, 'type': str}
+    }
+
+
+class CreatingApplicationExtension(QremisElement):
     _spec = {}
 
 
 class CreatingApplication(QremisElement):
     _spec = {
         'creatingApplicationName': {'repeatable': False, 'mandatory': False, 'type': str},
-
+        'creatingApplicationVersion': {'repeatable': False, 'mandatory': True, 'type': str},
+        'dateCreatedByApplication': {'repeatable': False, 'mandatory': True, 'type': str},
+        'creatingApplicationExtension': {'repeatable': True, 'mandatory': False, 'type': CreatingApplicationExtension}
     }
 
 
@@ -216,20 +310,294 @@ class Object(QremisElement):
     }
 
 
-class Event(QremisElement):
+class EventExtension(QremisElement):
     _spec = {}
+
+
+class EventDetailInformation(QremisElement):
+    _spec = {
+        'eventDetail': {'repeatable': False, 'mandatory': False, 'type': str},
+        'eventDetailExtension': {'repeatable': True, 'mandatory': False, 'type': str}
+    }
+
+
+class EventOutcomeDetailExtension(QremisElement):
+    _spec = {}
+
+
+class EventOutcomeDetail(QremisElement):
+    _spec = {
+        'eventOutcomeDetailNote': {'repeatable': False, 'mandatory': False, 'type': str},
+        'eventOutcomeDetailExtension': {'repeatable': True, 'mandatory': False, 'type': EventOutcomeDetailExtension}
+    }
+
+
+class EventOutcomeInformation(QremisElement):
+    _spec = {
+        'eventOutcome': {'repeatable': False, 'mandatory': False, 'type': str},
+        'eventOutcomeDetail': {'repeatable': True, 'mandatory': False, 'type': EventOutcomeDetail}
+    }
+
+
+class EventIdentifier(QremisElement):
+    _spec = {
+        'eventIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'eventIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class Event(QremisElement):
+    _spec = {
+        'eventIdentifier': {'repeatable': True, 'mandatory': True, 'type': ObjectIdentifier},
+        'eventType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'eventDateTime': {'repeatable': False, 'mandatory': True, 'type': str},
+        'eventDetailInformation': {'repeatable': True, 'mandatory': False, 'type': EventDetailInformation},
+        'eventOutcomeInformation': {'repeatable': True, 'mandatory': False, 'type': EventOutcomeInformation},
+        'linkingRelationships': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationships},
+        'eventExtension': {'repeatable': True, 'mandatory': False, 'type': EventExtension}
+    }
+
+
+class AgentIdentifier(QremisElement):
+    _spec = {
+        'agentIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'agentIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
 
 
 class Agent(QremisElement):
+    _spec = {
+        'agentIdentifier': {'repeatable': True, 'mandatory': True, 'type': AgentIdentifier},
+        'agentName': {'repeatable': True, 'mandatory': False, 'type': str},
+        'agentType': {'repeatable': False, 'mandatory': False, 'type': str},
+        'agentVersion': {'repeatable': False, 'mandatory': False, 'type': str},
+        'agentNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'linkingRelationships': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationshipIdentifier}
+    }
+
+
+class TermOfGrant(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': True, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class TermOfRestriction(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': True, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class RightsExtension(QremisElement):
     _spec = {}
+
+
+class RightsGranted(QremisElement):
+    _spec = {
+        'act': {'repeatable': False, 'mandatory': True, 'type': str},
+        'restriction': {'repeatable': True, 'mandatory': False, 'type': str},
+        'termOfGrant': {'repeatable': False, 'mandatory': False, 'type': TermOfGrant},
+        'termOfRestriction': {'repeatable': False, 'mandatory': False, 'type': TermOfRestriction},
+        'rightsGrantedNote': {'repeatable': True, 'mandatory': False, 'type': str}
+    }
+
+
+class OtherRightsApplicableDates(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': False, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class OtherRightsDocumentationIdentifier(QremisElement):
+    _spec = {
+        'otherRightsDocumentationIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'otherRightsDocumentationIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str},
+        'otherRightsDocumentationRole': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class OtherRightsInformation(QremisElement):
+    _spec = {
+        'otherRightsDocumentationIdentifier': {'repeatable': True, 'mandatory': False,
+                                               'type': OtherRightsDocumentationIdentifier},
+        'otherRightsBasis': {'repeatable': False, 'mandatory': True, 'type': str},
+        'otherRightsApplicableDates': {'repeatable': False, 'mandatory': False, 'type': OtherRightsApplicableDates},
+        'otherRightsNote': {'repeatable': True, 'mandatory': False, 'type': str}
+    }
+
+
+class StatuteApplicableDates(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': False, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class StatuteDocumentationIdentifier(QremisElement):
+    _spec = {
+        'statuteDocumentationIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'statuteDocumentationIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str},
+        'statuteDocumentationIdentifierRole': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class StatuteInformation(QremisElement):
+    _spec = {
+        'statueJurisdiction': {'repeatable': False, 'mandatory': True, 'type': str},
+        'statuteCitation': {'repeatable': False, 'mandatory': True, 'type': str},
+        'statuteInformationDeterminationDate': {'repeatable': False, 'mandatory': True, 'type': str},
+        'statuteNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'statuteDocumentationIdentifier': {'repeatable': True, 'mandatory': False,
+                                           'type': StatuteDocumentationIdentifier},
+        'statuteApplicableDates': {'repeatable': False, 'mandatory': False, 'type': StatuteApplicableDates}
+    }
+
+
+class LicenseApplicableDates(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': False, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class LicenseDocumentationIdentifier(QremisElement):
+    _spec = {
+        'licenseDocumentationIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'licenseDocumentationIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str},
+        'licenseDocumentationRole': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class LicenseInformation(QremisElement):
+    _spec = {
+        'licenseDocumentationIdentifier': {'repeatable': True, 'mandatory': False,
+                                           'type': LicenseDocumentationIdentifier},
+        'licenseTerms': {'repeatable': False, 'mandatory': False, 'type': str},
+        'licenseNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'licenseApplicableDates': {'repeatable': False, 'mandatory': False, 'type': LicenseApplicableDates}
+    }
+
+
+class CopyrightApplicableDates(QremisElement):
+    _spec = {
+        'startDate': {'repeatable': False, 'mandatory': False, 'type': str},
+        'endDate': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class CopyrightDocumentationIdentifier(QremisElement):
+    _spec = {
+        'copyrightDocumentationIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'copyrightDocumentationIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str},
+        'copyrightDocumentationRole': {'repeatable': True, 'mandatory': False, 'type': str}
+    }
+
+
+class CopyrightInformation(QremisElement):
+    _spec = {
+        'copyrightStatus': {'repeatable': False, 'mandatory': True, 'type': str},
+        'copyrightJurisdiction': {'repeatable': False, 'mandatory': True, 'type': str},
+        'copyrightStatusDeterminationDate': {'repeatable': False, 'mandatory': False, 'type': str},
+        'copyrightNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'copyrightDocumentationIdentifier': {'repeatable': True, 'mandatory': False,
+                                             'type': CopyrightDocumentationIdentifier},
+        'copyrightApplicableDates': {'repeatable': False, 'mandatory': False, 'type': CopyrightApplicableDates}
+    }
+
+
+class RightsStatementIdentifier(QremisElement):
+    _spec = {
+        'rightsStatementIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'rightsStatementIdentifierValue': {'repeatable': False, 'mandatory': False, 'type': str}
+    }
+
+
+class RightsStatement(QremisElement):
+    _spec = {
+        'rightsStatementIdentifier': {'repeatable': False, 'mandatory': True, 'type': RightsStatementIdentifier},
+        'rightsBasis': {'repeatable': False, 'mandatory': True, 'type': str},
+        'copyrightInformation': {'repeatable': False, 'mandatory': False, 'type': CopyrightInformation},
+        'licenseInformation': {'repeatable': False, 'mandatory': False, 'type': LicenseInformation},
+        'statuteInformation': {'repeatable': False, 'mandatory': False, 'type': StatuteInformation},
+        'otherRightsInformation': {'repeatable': False, 'mandatory': False, 'type': OtherRightsInformation},
+        'rightsGranted': {'repeatable': True, 'mandatory': False, 'type': RightsGranted}
+    }
+
+
+class RightsIdentifier(QremisElement):
+    _spec = {
+        'rightsIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'rightsIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
 
 
 class Rights(QremisElement):
+    _spec = {
+        'rightsIdentifier': {'repeatable': True, 'mandatory': True, 'type': RightsIdentifier},
+        'rightsStatement': {'repeatable': True, 'mandatory': False, 'type': RightsStatement},
+        'linkingRelationships': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationships},
+        'rightsExtension': {'repeatable': True, 'mandatory': False, 'type': RightsExtension}
+    }
+
+
+class RelationshipExtension(QremisElement):
     _spec = {}
+
+
+class LinkingRightsIdentifier(QremisElement):
+    _spec = {
+        'linkingRightsIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingRightsIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class LinkingAgentIdentifier(QremisElement):
+    _spec = {
+        'linkingAgentIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingAgentIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class LinkingEventIdentifier(QremisElement):
+    _spec = {
+        'linkingEventIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingEventIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class LinkingObjectIdentifier(QremisElement):
+    _spec = {
+        'linkingObjectIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingObjectIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
+
+
+class RelationshipIdentifier(QremisElement):
+    _spec = {
+        'relationshipIdentifierType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'relationshipIdentifierValue': {'repeatable': False, 'mandatory': True, 'type': str}
+    }
 
 
 class Relationship(QremisElement):
-    _spec = {}
+    _spec = {
+        'relationshipIdentifier': {'repeatable': True, 'mandatory': True, 'type': RelationshipIdentifier},
+        'relationshipType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'relationshipSubType': {'repeatable': False, 'mandatory': True, 'type': str},
+        'linkingObjectIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingObjectIdentifier},
+        'linkingEventIdentifier':  {'repeatable': True, 'mandatory': False, 'type': LinkingEventIdentifier},
+        'linkingAgentIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingAgentIdentifier},
+        'linkingRightsIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingRightsIdentifier},
+        'relationshipRole': {'repeatable': False, 'mandatory': False, 'type': str},
+        'relationshipSequence': {'repeatable': False, 'mandatory': False, 'type': str},
+        'linkingEnvironmentPurpose': {'repeatable': True, 'mandatory': False, 'type': str},
+        'linkingEnvironmentCharacteristic': {'repeatable': False, 'mandatory': False, 'type': str},
+        'relationshipNote': {'repeatable': True, 'mandatory': False, 'type': str},
+        'relationshipExtension': {'repeatable': True, 'mandatory': False, 'type': RelationshipExtension}
+    }
 
 
 class Qremis(QremisElement):
@@ -240,3 +608,22 @@ class Qremis(QremisElement):
         'rights': {'repeatable': True, 'mandatory': False, 'type': Rights},
         'relationship': {'repeatable': True, 'mandatory': False, 'type': Relationship}
     }
+
+
+class _RootElement(QremisElement):
+    # Makes the recursion for the enumerate_specification function clean
+    _spec = {
+        'qremis': {'repeatable': False, 'mandatory': True, 'type': Qremis}
+    }
+
+
+def enumerate_specification(kls=_RootElement):
+    r = {}
+    for x in kls._spec:
+        r[x] = {}
+        r[x]['repeatable'] = kls._spec[x]['repeatable']
+        r[x]['mandatory'] = kls._spec[x]['mandatory']
+        r[x]['type'] = kls._spec[x]['type'].__name__
+        if kls._spec[x]['type'] not in [str]:  # I'll leave this easily extensible for the moment
+            r[x]['spec'] = enumerate_specification(kls=kls._spec[x]['type'])
+    return r
