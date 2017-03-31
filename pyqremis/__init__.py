@@ -1,4 +1,5 @@
 from functools import partial
+from inspect import getmro
 
 
 def lowerFirst(s):
@@ -7,7 +8,47 @@ def lowerFirst(s):
     return s[0].lower() + s[1:]
 
 
+# TODO: Probably refactor a bunch of stuff to use this.
+def iter_wrap(thing, callback):
+    if isinstance(thing, list) or \
+            isinstance(thing, set) or \
+            isinstance(thing, tuple):
+        return [callback(x) for x in thing]
+    return callback(thing)
+
+
 class QremisElement:
+    @classmethod
+    def from_dict(cls, d):
+        if len(d) == 0:
+            raise ValueError("No empty elements!")
+        kwargs = {}
+        for x in d:
+            if x not in cls._spec.keys():
+                raise TypeError("Erroneous field! - {}".format(x))
+            spec = cls._spec[x]
+            if spec['repeatable'] is False:
+                if spec['type'] == str:
+                    kwargs[x] = d[x]
+                elif QremisElement in getmro(spec['type']):
+                    kwargs[x] = spec['type'].from_dict(d[x])
+                else:
+                    raise TypeError()
+            else:
+                kwargs[x] = []
+                for y in d[x]:
+                    if spec['type'] == str:
+                        kwargs[x].append(y)
+                    elif QremisElement in getmro(spec['type']):
+                        kwargs[x].append(spec['type'].from_dict(y))
+                    else:
+                        raise TypeError()
+        return cls(**kwargs)
+
+    @classmethod
+    def from_xml_element(cls, e):
+        pass
+
     def __init__(self, *args, **kwargs):
         # Structural requirement for child classes
         # (abc doesn't have an appropriate dectorator for this,
@@ -58,29 +99,48 @@ class QremisElement:
                 getattr(self, "set_{}".format(lowerFirst(x.__class__.__name__)))(x)
         for x in kwargs:
             if self._spec[x]['repeatable']:
-                getattr(self, "add_{}".format(x))(kwargs[x])
+                if isinstance(kwargs[x], list) or isinstance(kwargs[x], set) or isinstance(kwargs[x], tuple):
+                    for y in kwargs[x]:
+                        getattr(self, "add_{}".format(x))(y)
+                else:
+                    getattr(self, "add_{}".format(x))(kwargs[x])
             else:
                 getattr(self, "set_{}".format(x))(kwargs[x])
+
+    def __eq__(self, other):
+        try:
+            return self.to_dict() == other.to_dict()
+        except:
+            return False
 
     def set_field(self, fieldname, fieldvalue, _type=None, repeatable=False):
         # TODO: Handle iters better? Probably need to dig around
         # in collections.abc
         if repeatable:
-            try:
-                self.add_to_field(fieldname, fieldvalue, _type=_type)
-            except TypeError:  # Maybe its an iter of values
+            # Handle iterables in kwags, but strings are iterables, so limit it to lists/sets/tuples?
+            if isinstance(fieldvalue, list) or isinstance(fieldvalue, set) or isinstance(fieldvalue, tuple):
                 for x in fieldvalue:
                     self.add_to_field(fieldname, x, _type=_type)
+            else:
+                self.add_to_field(fieldname, fieldvalue, _type=_type)
         else:
             if _type is not None:
                 if not isinstance(fieldvalue, _type):
-                    raise TypeError()
+                    raise TypeError(
+                        "Attempted to set {} to a value that is {}, not {}".format(
+                            fieldname, str(type(fieldvalue)), str(_type)
+                        )
+                    )
             self._fields[fieldname] = fieldvalue
 
     def add_to_field(self, fieldname, fieldvalue, _type=None):
         if _type is not None:
             if not isinstance(fieldvalue, _type):
-                raise TypeError()
+                raise TypeError(
+                    "Attempted to set {} to a value that is {}, not {}".format(
+                        fieldname, str(type(fieldvalue)), str(_type)
+                    )
+                )
         if fieldname not in self._fields:
             self._fields[fieldname] = []
         self._fields[fieldname].append(fieldvalue)
@@ -140,6 +200,32 @@ class ExtensionElement(QremisElement):
     # Extension Elements are (almost) wholely uncontrolled. At the moment I'm preventing them
     # from being init'd empty. They (by default) assume fields are repeatable unless the kwarg
     # in set_field is set to False
+    @classmethod
+    def from_dict(cls, d):
+        if len(d) == 0:
+            raise ValueError("No empty elements!")
+        kwargs = {}
+        for x in d:
+            # Make up a spec on the fly - everything is repeatable and elements must be the type they are.
+            spec = {'repeatable': True, 'type': type(x)}
+            if spec['repeatable'] is False:
+                if spec['type'] == str:
+                    kwargs[x] = d[x]
+                elif QremisElement in getmro(spec['type']):
+                    kwargs[x] = spec['type'].from_dict(d[x])
+                else:
+                    raise TypeError()
+            else:
+                kwargs[x] = []
+                for y in d[x]:
+                    if spec['type'] == str:
+                        kwargs[x].append(y)
+                    elif QremisElement in getmro(spec['type']):
+                        kwargs[x].append(spec['type'].from_dict(y))
+                    else:
+                        raise TypeError()
+        return cls(**kwargs)
+
     def __init__(self, **kwargs):
         if len(kwargs) == 0:
             raise ValueError("No empty elements!")
@@ -153,6 +239,32 @@ class ExtensionElement(QremisElement):
 
 
 class ExtendedElement(QremisElement):
+    @classmethod
+    def from_dict(cls, d):
+        if len(d) == 0:
+            raise ValueError("No empty elements!")
+        kwargs = {}
+        for x in d:
+            # Make up a spec on the fly - everything is repeatable and elements must be the type they are.
+            spec = {'repeatable': True, 'type': type(x)}
+            if spec['repeatable'] is False:
+                if spec['type'] == str:
+                    kwargs[x] = d[x]
+                elif QremisElement in getmro(spec['type']):
+                    kwargs[x] = spec['type'].from_dict(d[x])
+                else:
+                    raise TypeError()
+            else:
+                kwargs[x] = []
+                for y in d[x]:
+                    if spec['type'] == str:
+                        kwargs[x].append(y)
+                    elif QremisElement in getmro(spec['type']):
+                        kwargs[x].append(spec['type'].from_dict(y))
+                    else:
+                        raise TypeError()
+        return cls(**kwargs)
+
     def __init__(self, **kwargs):
         # Values can only be set in the init via kwargs
         # We don't dynamically whip up any any getters or setters, and there's no validation
@@ -166,7 +278,8 @@ class ExtendedElement(QremisElement):
             raise ValueError("No empty elements!")
         self._fields = {}
         for x in kwargs:
-            self.add_to_field(x, kwargs[x])
+            iter_wrap(kwargs[x], partial(self.add_to_field, x))
+#            self.add_to_field(x, kwargs[x])
 
     def set_field(self, fieldname, fieldvalue, _type=None):
         super().set_field(fieldname, fieldvalue, _type=_type, repeatable=True)
@@ -693,7 +806,6 @@ class QremisRoot(QremisElement):
 
 
 def enumerate_specification(kls=QremisRoot):
-    from inspect import getmro
     r = {}
     for x in kls._spec:
         r[x] = {}
