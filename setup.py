@@ -7,7 +7,7 @@ def readme():
 
 setup(
     name = 'pyqremis',
-    description = 'Library code implementing the qremis metadata standard' + \
+    description = 'Library code implementing the qremis metadata standard'
     long_description = readme(),
     author = "Brian Balsamo",
     author_email = "balsamo@uchicago.edu",
