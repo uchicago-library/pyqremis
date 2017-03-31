@@ -8,7 +8,6 @@ def lowerFirst(s):
     return s[0].lower() + s[1:]
 
 
-# TODO: Probably refactor a bunch of stuff to use this.
 def iter_wrap(thing, callback):
     if isinstance(thing, list) or \
             isinstance(thing, set) or \
