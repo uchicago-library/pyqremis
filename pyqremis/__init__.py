@@ -99,11 +99,7 @@ class QremisElement:
                 getattr(self, "set_{}".format(lowerFirst(x.__class__.__name__)))(x)
         for x in kwargs:
             if self._spec[x]['repeatable']:
-                if isinstance(kwargs[x], list) or isinstance(kwargs[x], set) or isinstance(kwargs[x], tuple):
-                    for y in kwargs[x]:
-                        getattr(self, "add_{}".format(x))(y)
-                else:
-                    getattr(self, "add_{}".format(x))(kwargs[x])
+                iter_wrap(kwargs[x], getattr(self, "add_{}".format(x)))
             else:
                 getattr(self, "set_{}".format(x))(kwargs[x])
 
@@ -117,12 +113,7 @@ class QremisElement:
         # TODO: Handle iters better? Probably need to dig around
         # in collections.abc
         if repeatable:
-            # Handle iterables in kwags, but strings are iterables, so limit it to lists/sets/tuples?
-            if isinstance(fieldvalue, list) or isinstance(fieldvalue, set) or isinstance(fieldvalue, tuple):
-                for x in fieldvalue:
-                    self.add_to_field(fieldname, x, _type=_type)
-            else:
-                self.add_to_field(fieldname, fieldvalue, _type=_type)
+            iter_wrap(fieldvalue, partial(self.add_to_field(fieldname, _type=_type, repeatable=repeatable)))
         else:
             if _type is not None:
                 if not isinstance(fieldvalue, _type):
@@ -158,9 +149,15 @@ class QremisElement:
             del self._fields[fieldname]
 
     def to_dict(self):
+        # TODO:
+        # This doesn't play nicely with iter_wrap unless I change it to two callbacks,
+        # maybe a kwarg like...
+        # iter_callback = None and if iter_callback is None iter_callback=callback
         r = {}
         for x in self._fields:
-            if isinstance(self._fields[x], list):
+            if isinstance(self._fields[x], list) or \
+                    isinstance(self._fields[x], set) or \
+                    isinstance(self._fields[x], tuple):
                 r[x] = []
                 for y in self._fields[x]:
                     if isinstance(y, QremisElement):
@@ -175,10 +172,16 @@ class QremisElement:
         return r
 
     def to_xml_element(self):
+        # TODO:
+        # This doesn't play nicely with iter_wrap unless I change it to two callbacks,
+        # maybe a kwarg like...
+        # iter_callback = None and if iter_callback is None iter_callback=callback
         import xml.etree.ElementTree as ET
         e = ET.Element(lowerFirst(self.__class__.__name__))
         for x in self._fields:
-            if isinstance(self._fields[x], list):
+            if isinstance(self._fields[x], list) or \
+                    isinstance(self._fields[x], set) or \
+                    isinstance(self._fields[x], tuple):
                 for y in self._fields[x]:
                     if isinstance(y, QremisElement):
                         e.append(y.to_xml_element())
