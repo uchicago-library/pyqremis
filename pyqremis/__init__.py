@@ -298,12 +298,6 @@ class LinkingRelationshipIdentifier(QremisElement):
     }
 
 
-class LinkingRelationships(QremisElement):
-    _spec = {
-        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': True, 'type': LinkingRelationshipIdentifier}
-    }
-
-
 class EnvironmentExtension(ExtendedElement):
     pass
 
@@ -492,7 +486,8 @@ class Object(QremisElement):
         'environmentDesignation': {'mandatory': False, 'repeatable': True, 'type': EnvironmentDesignation},
         'environmentRegistry':  {'mandatory': False, 'repeatable': True, 'type': EnvironmentRegistry},
         'environmentExtension': {'mandatory': False, 'repeatable': True, 'type': EnvironmentExtension},
-        'linkingRelationships': {'mandatory': False, 'repeatable': False, 'type': LinkingRelationships},
+        'linkingRelationshipIdentifier': {'mandatory': False, 'repeatable': True,
+                                          'type': LinkingRelationshipIdentifier},
         'objectExtension': {'mandatory': False, 'repeatable': True, 'type': ObjectExtension}
     }
 
@@ -540,7 +535,7 @@ class Event(QremisElement):
         'eventDateTime': {'repeatable': False, 'mandatory': True, 'type': str},
         'eventDetailInformation': {'repeatable': True, 'mandatory': False, 'type': EventDetailInformation},
         'eventOutcomeInformation': {'repeatable': True, 'mandatory': False, 'type': EventOutcomeInformation},
-        'linkingRelationships': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationships},
+        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingRelationshipIdentifier},
         'eventExtension': {'repeatable': True, 'mandatory': False, 'type': EventExtension}
     }
 
@@ -725,7 +720,8 @@ class Rights(QremisElement):
     _spec = {
         'rightsIdentifier': {'repeatable': True, 'mandatory': True, 'type': RightsIdentifier},
         'rightsStatement': {'repeatable': True, 'mandatory': False, 'type': RightsStatement},
-        'linkingRelationships': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationships},
+        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': False,
+                                          'type': LinkingRelationshipIdentifier},
         'rightsExtension': {'repeatable': True, 'mandatory': False, 'type': RightsExtension}
     }
 
