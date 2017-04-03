@@ -530,7 +530,7 @@ class EventIdentifier(QremisElement):
 
 class Event(QremisElement):
     _spec = {
-        'eventIdentifier': {'repeatable': True, 'mandatory': True, 'type': ObjectIdentifier},
+        'eventIdentifier': {'repeatable': True, 'mandatory': True, 'type': EventIdentifier},
         'eventType': {'repeatable': False, 'mandatory': True, 'type': str},
         'eventDateTime': {'repeatable': False, 'mandatory': True, 'type': str},
         'eventDetailInformation': {'repeatable': True, 'mandatory': False, 'type': EventDetailInformation},
