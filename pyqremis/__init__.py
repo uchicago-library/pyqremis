@@ -554,7 +554,7 @@ class Agent(QremisElement):
         'agentType': {'repeatable': False, 'mandatory': False, 'type': str},
         'agentVersion': {'repeatable': False, 'mandatory': False, 'type': str},
         'agentNote': {'repeatable': True, 'mandatory': False, 'type': str},
-        'linkingRelationshipIdentifier': {'repeatable': False, 'mandatory': False, 'type': LinkingRelationshipIdentifier}
+        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingRelationshipIdentifier}
     }
 
 
