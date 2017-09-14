@@ -1,5 +1,12 @@
+"""
+pyqremis
+"""
 from functools import partial
 from inspect import getmro
+
+__author__ = "Brian Balsamo"
+__email__ = "brian@brianbalsamo.com"
+__version__ = "0.0.1"
 
 
 def lowerFirst(s):
@@ -535,7 +542,8 @@ class Event(QremisElement):
         'eventDateTime': {'repeatable': False, 'mandatory': True, 'type': str},
         'eventDetailInformation': {'repeatable': True, 'mandatory': False, 'type': EventDetailInformation},
         'eventOutcomeInformation': {'repeatable': True, 'mandatory': False, 'type': EventOutcomeInformation},
-        'linkingRelationshipIdentifier': {'repeatable': True, 'mandatory': False, 'type': LinkingRelationshipIdentifier},
+        'linkingRelationshipIdentifier':
+            {'repeatable': True, 'mandatory': False, 'type': LinkingRelationshipIdentifier},
         'eventExtension': {'repeatable': True, 'mandatory': False, 'type': EventExtension}
     }
 
