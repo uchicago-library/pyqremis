@@ -9,7 +9,7 @@ def readme():
 setup(
     name="pyqremis",
     description="A python library for implementing the qremis metadata standard.",
-    version="0.0.2",
+    version="0.0.3",
     long_description=readme(),
     author="Brian Balsamo",
     author_email="brian@brianbalsamo.com",
