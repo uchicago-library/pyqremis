@@ -18,7 +18,7 @@ setup(
         ]
     ),
     include_package_data=True,
-    url='https://github.com/bnbalsamo/pyqremis',
+    url='https://github.com/uchicago-library/pyqremis',
     install_requires=[
     ],
     tests_require=[
